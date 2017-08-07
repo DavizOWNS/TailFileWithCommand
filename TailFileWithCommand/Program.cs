@@ -15,7 +15,6 @@ namespace TailFileWithCommand
     {
         static void Main(string[] args)
         {
-            WriteLine("Starting TailFileWithCommand...");
             int exitCode = MainAsync(args).GetAwaiter().GetResult();
 
             Environment.Exit(exitCode);
