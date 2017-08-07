@@ -70,6 +70,7 @@ namespace TailFileWithCommand
                 //start at the end of the file
                 long lastMaxOffset = 0;
 
+                string line = string.Empty;
                 while (true)
                 {
                     await Task.Delay(100);
@@ -83,9 +84,29 @@ namespace TailFileWithCommand
                     reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
 
                     //read out of the file until the EOF
-                    string line = "";
-                    while ((line = reader.ReadLine()) != null)
-                        WriteLine(line);
+                    int c;
+                    while((c = reader.Peek()) != -1)
+                    {
+                        reader.Read();
+                        if (c == '\r')
+                        {
+                            if(reader.Peek() == '\n')
+                            {
+                                reader.Read();
+                                WriteLine(line);
+                                line = string.Empty;
+                                break;
+                            }
+                        }
+                        if(c == '\n')
+                        {
+                            WriteLine(line);
+                            line = string.Empty;
+                            break;
+                        }
+
+                        line += (char)c;
+                    }
 
                     //update the last max offset
                     lastMaxOffset = reader.BaseStream.Position;
