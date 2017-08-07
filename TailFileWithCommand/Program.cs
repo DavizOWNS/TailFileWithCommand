@@ -81,8 +81,8 @@ namespace TailFileWithCommand
                         continue;
 
                     //seek to the last max offset
-                    reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
-                    reader.DiscardBufferedData();
+                    //reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
+                    //reader.DiscardBufferedData();
 
                     //read out of the file until the EOF
                     int c;
