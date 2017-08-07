@@ -24,7 +24,10 @@ namespace TailFileWithCommand
         static async Task<int> MainAsync(string[] args)
         {
             if (args.Length < 2)
+            {
+                WriteLine("At least 2 arguments are required");
                 return 1;
+            }
             string tailFilePath = args[0];
             string commandPath = args[1];
             string cmdArgs = string.Empty;
