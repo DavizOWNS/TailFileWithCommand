@@ -34,12 +34,14 @@ namespace TailFileWithCommand
             CancellationTokenSource cts = new CancellationTokenSource();
             var tailTask = TailFile(tailFilePath, cts.Token);
 
+            WriteLine("Starting process " + commandPath);
             var proc = Process.Start(new ProcessStartInfo(commandPath, cmdArgs)
             {
             });
             var procTask = Task.Factory.StartNew(() =>
             {
                 proc.WaitForExit();
+                Thread.Sleep(1000);
                 cts.Cancel();
             });
 
