@@ -30,17 +30,24 @@ namespace TailFileWithCommand
             foreach (var a in args.Skip(2))
                 cmdArgs += a + " ";
 
+            if (File.Exists(tailFilePath)) File.Delete(tailFilePath);
             CancellationTokenSource cts = new CancellationTokenSource();
             var tailTask = TailFile(tailFilePath, cts.Token);
 
-            var proc = Process.Start(commandPath, cmdArgs);
+            var proc = Process.Start(new ProcessStartInfo(commandPath, cmdArgs)
+            {
+            });
             var procTask = Task.Factory.StartNew(() =>
             {
                 proc.WaitForExit();
                 cts.Cancel();
             });
 
-            await Task.WhenAll(tailTask, procTask);
+            try
+            {
+                await Task.WhenAll(tailTask, procTask);
+            }
+            catch (OperationCanceledException) { }
 
             return proc.ExitCode;
         }
