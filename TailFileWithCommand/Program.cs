@@ -82,17 +82,20 @@ namespace TailFileWithCommand
 
                     //seek to the last max offset
                     reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
+                    reader.DiscardBufferedData();
 
                     //read out of the file until the EOF
                     int c;
                     while((c = reader.Peek()) != -1)
                     {
                         reader.Read();
+                        lastMaxOffset++;
                         if (c == '\r')
                         {
                             if(reader.Peek() == '\n')
                             {
                                 reader.Read();
+                                lastMaxOffset++;
                                 WriteLine(line);
                                 line = string.Empty;
                                 break;
@@ -109,7 +112,7 @@ namespace TailFileWithCommand
                     }
 
                     //update the last max offset
-                    lastMaxOffset = reader.BaseStream.Position;
+                    //lastMaxOffset = reader.BaseStream.Position;
                 }
             }
         }

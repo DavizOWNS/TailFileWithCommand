@@ -20,7 +20,7 @@ namespace Logger
                     var line = Console.ReadLine();
                     if (line.StartsWith("end"))
                         return;
-                    writer.Write(line);
+                    writer.WriteLine(line);
                     writer.Flush();
                 }
             }
