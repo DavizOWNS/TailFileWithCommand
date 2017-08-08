@@ -73,7 +73,7 @@ namespace TailFileWithCommand
                 long fileLength = file.Length;
                 if (fileLength > lastFilePosition)
                 {
-                    using (var fs = file.OpenRead())
+                    using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         fs.Seek(lastFilePosition, SeekOrigin.Begin);
                         using (var reader = new StreamReader(fs))
