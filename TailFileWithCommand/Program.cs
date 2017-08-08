@@ -64,57 +64,85 @@ namespace TailFileWithCommand
                 await Task.Delay(1000);
                 cancellationToken.ThrowIfCancellationRequested();
             }
-            using (StreamReader reader = new StreamReader(new FileStream(filePath,
-                     FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+
+            long lastFilePosition = 0;
+            while(true)
             {
-                //start at the end of the file
-                long lastMaxOffset = 0;
-
-                string line = string.Empty;
-                while (true)
+                cancellationToken.ThrowIfCancellationRequested();
+                var file = new FileInfo(filePath);
+                long fileLength = file.Length;
+                if (fileLength > lastFilePosition)
                 {
-                    await Task.Delay(100);
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    //if the file size has not changed, idle
-                    if (reader.BaseStream.Length == lastMaxOffset)
-                        continue;
-
-                    //seek to the last max offset
-                    //reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
-                    //reader.DiscardBufferedData();
-
-                    //read out of the file until the EOF
-                    int c;
-                    while((c = reader.Peek()) != -1)
+                    using (var fs = file.OpenRead())
                     {
-                        reader.Read();
-                        lastMaxOffset++;
-                        if (c == '\r')
+                        fs.Seek(lastFilePosition, SeekOrigin.Begin);
+                        using (var reader = new StreamReader(fs))
                         {
-                            if(reader.Peek() == '\n')
-                            {
-                                reader.Read();
-                                lastMaxOffset++;
-                                WriteLine(line);
-                                line = string.Empty;
-                                break;
-                            }
-                        }
-                        if(c == '\n')
-                        {
-                            WriteLine(line);
-                            line = string.Empty;
-                            break;
-                        }
+                            int bytesToRead = (int)(fileLength - lastFilePosition);
+                            char[] buffer = new char[bytesToRead];
+                            int bytesRead = reader.ReadBlock(buffer, 0, bytesToRead);
+                            if (bytesRead != bytesToRead) WriteLine("READER ERROR: BYTE_COUNT_MISMATCH");
 
-                        line += (char)c;
+                            Write(buffer);
+                        }
                     }
 
-                    //update the last max offset
-                    //lastMaxOffset = reader.BaseStream.Position;
+                    lastFilePosition = fileLength;
                 }
+
+                await Task.Delay(500);
             }
+            //using (StreamReader reader = new StreamReader(new FileStream(filePath,
+            //         FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            //{
+            //    //start at the end of the file
+            //    long lastMaxOffset = 0;
+
+            //    string line = string.Empty;
+            //    while (true)
+            //    {
+            //        await Task.Delay(100);
+            //        cancellationToken.ThrowIfCancellationRequested();
+
+            //        //if the file size has not changed, idle
+            //        if (reader.BaseStream.Length == lastMaxOffset)
+            //            continue;
+
+            //        //seek to the last max offset
+            //        //reader.BaseStream.Seek(lastMaxOffset, SeekOrigin.Begin);
+            //        //reader.DiscardBufferedData();
+
+            //        //read out of the file until the EOF
+            //        int c;
+            //        while((c = reader.Peek()) != -1)
+            //        {
+            //            reader.Read();
+            //            lastMaxOffset++;
+            //            if (c == '\r')
+            //            {
+            //                if(reader.Peek() == '\n')
+            //                {
+            //                    reader.Read();
+            //                    lastMaxOffset++;
+            //                    WriteLine(line);
+            //                    line = string.Empty;
+            //                    break;
+            //                }
+            //            }
+            //            if(c == '\n')
+            //            {
+            //                WriteLine(line);
+            //                line = string.Empty;
+            //                break;
+            //            }
+
+            //            line += (char)c;
+            //        }
+
+            //        //update the last max offset
+            //        //lastMaxOffset = reader.BaseStream.Position;
+            //    }
+            //}
         }
     }
 }
