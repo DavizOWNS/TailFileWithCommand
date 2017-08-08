@@ -38,9 +38,7 @@ namespace TailFileWithCommand
             var tailTask = TailFile(tailFilePath, cts.Token);
 
             WriteLine("Starting process " + commandPath);
-            var proc = Process.Start(new ProcessStartInfo(commandPath, cmdArgs)
-            {
-            });
+            var proc = Process.Start(new ProcessStartInfo(commandPath, cmdArgs));
             var procTask = Task.Factory.StartNew(() =>
             {
                 proc.WaitForExit();
@@ -81,7 +79,10 @@ namespace TailFileWithCommand
                             int bytesToRead = (int)(fileLength - lastFilePosition);
                             char[] buffer = new char[bytesToRead];
                             int bytesRead = reader.ReadBlock(buffer, 0, bytesToRead);
-                            if (bytesRead != bytesToRead) WriteLine("READER ERROR: BYTE_COUNT_MISMATCH");
+                            while(bytesToRead - bytesRead > 0)
+                            {
+                                bytesRead += reader.ReadBlock(buffer, bytesRead, bytesToRead - bytesRead);
+                            }
 
                             Write(buffer);
                         }
